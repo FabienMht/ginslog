@@ -1,0 +1,91 @@
+run:
+  timeout: 5m
+  modules-download-mode: readonly
+
+linters:
+  enable:
+    - errcheck
+    - gosimple
+    - govet
+    - ineffassign
+    - staticcheck
+    - typecheck
+    - unused
+    - goimports
+    - revive
+    - nolintlint
+    - usestdlibvars
+    - tagliatelle
+    - predeclared
+    - errorlint
+    - unconvert
+    - tagalign
+    - gofumpt
+    - misspell
+    - nonamedreturns
+
+linters-settings:
+  errcheck:
+    # To check errors in type assertions
+    check-type-assertions: true
+    # To not allows to blank errors with _
+    check-blank: true
+
+  misspell:
+    # To set the language to check with
+    locale: US
+
+  tagalign:
+    # To not align tag
+    align: false
+    # To sort tags by name
+    sort: true
+    # To specify the order of tags, the other tags will be sorted by name
+    order:
+      - json
+
+  errorlint:
+    # To check whether fmt.Errorf uses the %w verb for formatting errors
+    errorf: true
+    # To not allows more than 1 %w verb
+    errorf-multi: false
+    # To check for plain type assertions and type switches
+    asserts: true
+    # To check for plain error comparisons
+    comparison: true
+
+  predeclared:
+    # To not include method names and field names in checks
+    q: false
+
+  tagliatelle:
+    case:
+      # Do not check field names in struct with the json tag
+      use-field-name: false
+      # Choose case for struct tags
+      rules:
+        json: snake
+
+  usestdlibvars:
+    # To use http method string instead of the stdlib vars
+    http-method: false
+
+  govet:
+    # To enable all analyzers
+    enable-all: true
+    # To disable analyzers by name
+    disable:
+      - fieldalignment
+      - shadow
+
+  gofumpt:
+    # To use extra rules on top of gofmt
+    extra-rules: true
+
+issues:
+  exclude-use-default: false
+  max-issues-per-linter: 0
+  max-same-issues: 0
+  exclude:
+    - "exported: .*"
+    - "package-comments: .*"
