@@ -1,0 +1,100 @@
+version: "3"
+
+vars:
+  # Pin version of golangci-lint
+  GOLANGCI_VERSION: v1.53.3
+  # Pin version of gotestsum
+  GOTESTSUM_VERSION: v1.10.1
+  # Pin version of trivy
+  TRIVY_VERSION: 0.43.1
+  # Default gotestsum output format
+  # - dots: print a character for each test
+  # - pkgname: print a line for each package
+  # - testname: print a line for each test and package
+  GOTESTSUM_FORMAT: testname
+
+tasks: 
+  dev:
+    desc: Install dev dependencies.
+    cmds:
+      - go install github.com/golangci/golangci-lint/cmd/golangci-lint@{{.GOLANGCI_VERSION}}
+      - go install gotest.tools/gotestsum@{{.GOTESTSUM_VERSION}}
+      - docker pull aquasec/trivy:{{.TRIVY_VERSION}}
+    preconditions:
+      - command -v docker
+
+  clean:
+    desc: Clean up tests temporary files.
+    cmds:
+      - cmd: rm -rf
+          .task
+          .trivy
+          coverage.out
+        ignore_error: true
+
+  format:
+    desc: Format code.
+    cmds:
+      # Format go.mod and go.sum
+      - go mod tidy
+      # Format code with gofmt
+      # -s: simplify code
+      # -e: report all errors
+      # -l: list files whose formatting differs from gofmt's
+      # -w: write result to (source) file instead of stdout
+      - gofmt -s -e -l -w .
+      # Format code with golangci-lint
+      # --fix: apply all possible fixes to the code
+      # --issues-exit-code 0: exit code 0 even if issues are found
+      - golangci-lint run --config .golangci.yml --fix --issues-exit-code 0 > /dev/null
+
+  lint:
+    desc: Lint code.
+    cmds:
+      - task: format
+      - golangci-lint run --config .golangci.yml
+
+  test:
+    desc: Run tests.
+    cmds:
+      # Run tests with gotestsum
+      # Display coverage report
+      - gotestsum
+        --max-fails 1
+        --format {{.GOTESTSUM_FORMAT}}
+        --format-hide-empty-pkg
+        --
+        -coverpkg=./...
+        -cover
+        ./...
+  
+  coverage:
+    desc: Generate coverage report.
+    cmds:
+      # Generate coverage report
+      - gotestsum
+        --format {{.GOTESTSUM_FORMAT}}
+        --format-hide-empty-pkg
+        --
+        -coverpkg=./...
+        -coverprofile=coverage.out
+        ./...
+      # Display coverage report in text format
+      - go tool cover -func coverage.out
+
+  security:
+    desc: Scan for security vulnerabilities.
+    cmds:
+      # Scan go.mod and go.sum with trivy
+      - docker run --rm
+        -u $(id -u):$(id -g)
+        -v $PWD:/project
+        aquasec/trivy:0.43.1
+        --cache-dir /project/.trivy
+        --format table
+        fs
+        --no-progress
+        --scanners vuln
+        /project
+    preconditions:
+      - command -v docker
