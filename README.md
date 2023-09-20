@@ -1,5 +1,13 @@
 # ginslog
 
+![Go Version](https://img.shields.io/github/go-mod/go-version/FabienMht/ginslog.svg)
+[![GoDoc](https://img.shields.io/badge/godoc-reference-blue.svg)](https://pkg.go.dev/github.com/FabienMht/ginslog)
+[![Go Report Card](https://goreportcard.com/badge/github.com/FabienMht/ginslog)](https://goreportcard.com/report/github.com/FabienMht/ginslog)
+[![Sourcegraph](https://sourcegraph.com/github.com/FabienMht/ginslog/-/badge.svg)](https://sourcegraph.com/github.com/FabienMht/ginslog)
+[![Tag](https://img.shields.io/github/tag/FabienMht/ginslog.svg)](https://github.com/FabienMht/ginslog/tags)
+[![Contributors](https://img.shields.io/github/contributors/FabienMht/ginslog)](https://github.com/FabienMht/ginslog/graphs/contributors)
+[![License](https://img.shields.io/github/license/FabienMht/ginslog)](./LICENSE)
+
 A fully featured Gin middlewares for slog logging.
 It includes a logging and a panic recovery middlewares.
 

@@ -20,6 +20,9 @@ const (
 // CustomFields allows to add custom fields to the log line.
 type CustomFields func(c *gin.Context) []slog.Attr
 
+// CustomLogger allows to call a custom logger function.
+type CustomLogger func(c *gin.Context, logger *slog.Logger)
+
 // httpLevel associates a log level to an HTTP return code regex.
 type httpLevel struct {
 	// Log level to use.
@@ -56,6 +59,9 @@ type Config struct {
 	// If a blacklist is set, all paths except blacklisted are logged.
 	whitelistPaths []*regexp.Regexp
 	blacklistPaths []*regexp.Regexp
+
+	// Custom logger function.
+	customLogger CustomLogger
 
 	// Custom function to add custom fields to the log line.
 	customFields CustomFields
@@ -160,6 +166,13 @@ func WithBlacklistPath(blacklistPath []string) ConfigOption {
 		for _, v := range blacklistPath {
 			c.blacklistPaths = append(c.blacklistPaths, regexp.MustCompile(v))
 		}
+	}
+}
+
+// WithCustomLogger allows to set a custom logger function.
+func WithCustomLogger(customLogger CustomLogger) ConfigOption {
+	return func(c *Config) {
+		c.customLogger = customLogger
 	}
 }
 

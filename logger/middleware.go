@@ -12,23 +12,23 @@ import (
 // New returns a gin.HandlerFunc (middleware) that logs requests using slog.
 //
 // By default, the log level depend on the HTTP return code:
-// - 1XX return codes are logged at INFO level.
-// - 2XX return codes are logged at INFO level.
-// - 3XX return codes are logged at INFO level.
-// - 4XX return codes are logged at WARN level.
-// - 5XX return codes are logged at ERROR level.
+//   - 1XX return codes are logged at INFO level.
+//   - 2XX return codes are logged at INFO level.
+//   - 3XX return codes are logged at INFO level.
+//   - 4XX return codes are logged at WARN level.
+//   - 5XX return codes are logged at ERROR level.
 //
 // By default, all paths are logged. Whitelist and Blacklist
 // can be used to filter the paths.
 //
 // By default, the following fields are logged:
-// - IP address
-// - Status code
-// - HTTP method
-// - Path
-// - User agent
-// - Latency
-// - Request ID (X-Request-ID header)
+//   - IP address
+//   - Status code
+//   - HTTP method
+//   - Path
+//   - User agent
+//   - Latency
+//   - Request ID (X-Request-ID header)
 func New(logger *slog.Logger, opts ...ConfigOption) gin.HandlerFunc {
 	config := newConfig()
 	for _, opt := range opts {
@@ -111,11 +111,18 @@ func New(logger *slog.Logger, opts ...ConfigOption) gin.HandlerFunc {
 		for _, httpLevel := range config.httpLevels {
 			if httpLevel.match(c.Writer.Status()) {
 				logger.LogAttrs(context.Background(), httpLevel.level, "Incoming request", attributes...)
+
+				// Call the custom logger
+				config.customLogger(c, logger)
+
 				return
 			}
 		}
 
 		// If no status code matched, use the default level
 		logger.LogAttrs(context.Background(), config.defaultLevel, "Incoming request", attributes...)
+
+		// Call the custom logger
+		config.customLogger(c, logger)
 	}
 }
