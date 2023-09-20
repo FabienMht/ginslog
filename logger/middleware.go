@@ -65,6 +65,11 @@ func New(logger *slog.Logger, opts ...ConfigOption) gin.HandlerFunc {
 			}
 		}
 
+		// Check if the request should be logged
+		if config.customFilter != nil && !config.customFilter(c) {
+			return
+		}
+
 		attributes := []slog.Attr{}
 
 		// Add the IP address
@@ -113,7 +118,9 @@ func New(logger *slog.Logger, opts ...ConfigOption) gin.HandlerFunc {
 				logger.LogAttrs(context.Background(), httpLevel.level, "Incoming request", attributes...)
 
 				// Call the custom logger
-				config.customLogger(c, logger)
+				if config.customLogger != nil {
+					config.customLogger(c, logger)
+				}
 
 				return
 			}
@@ -123,6 +130,8 @@ func New(logger *slog.Logger, opts ...ConfigOption) gin.HandlerFunc {
 		logger.LogAttrs(context.Background(), config.defaultLevel, "Incoming request", attributes...)
 
 		// Call the custom logger
-		config.customLogger(c, logger)
+		if config.customLogger != nil {
+			config.customLogger(c, logger)
+		}
 	}
 }

@@ -275,6 +275,25 @@ func TestNewWhiteListBlackList(t *testing.T) {
 			wantLevel:  slog.LevelInfo,
 			wantPanic:  true,
 		},
+		{
+			name: "filter test2",
+			opts: []ConfigOption{
+				WithCustomFilter(func(c *gin.Context) bool {
+					return c.Request.URL.Path != "/test2"
+				}),
+			},
+			code: 200,
+			wantFields: []slog.Attr{
+				slog.String("ip", ""),
+				slog.Int("status", 200),
+				slog.String("method", "GET"),
+				slog.String("path", "/test1"),
+				slog.String("user-agent", "test1"),
+				slog.String("latency", ""),
+				slog.String("request-id", "52fdfc07-2182-454f-963f-5f0f9a621d72"),
+			},
+			wantLevel: slog.LevelInfo,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

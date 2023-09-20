@@ -23,6 +23,10 @@ type CustomFields func(c *gin.Context) []slog.Attr
 // CustomLogger allows to call a custom logger function.
 type CustomLogger func(c *gin.Context, logger *slog.Logger)
 
+// CustomFilter allows to filter the log line.
+// Return true to log the line, false otherwise.
+type CustomFilter func(c *gin.Context) bool
+
 // httpLevel associates a log level to an HTTP return code regex.
 type httpLevel struct {
 	// Log level to use.
@@ -60,6 +64,9 @@ type Config struct {
 	whitelistPaths []*regexp.Regexp
 	blacklistPaths []*regexp.Regexp
 
+	// Custom filter function.
+	customFilter CustomFilter
+
 	// Custom logger function.
 	customLogger CustomLogger
 
@@ -96,6 +103,8 @@ func newConfig() *Config {
 		},
 		whitelistPaths: []*regexp.Regexp{},
 		blacklistPaths: []*regexp.Regexp{},
+		customFilter:   nil,
+		customLogger:   nil,
 		customFields:   nil,
 		ipField:        true,
 		statusField:    true,
@@ -166,6 +175,13 @@ func WithBlacklistPath(blacklistPath []string) ConfigOption {
 		for _, v := range blacklistPath {
 			c.blacklistPaths = append(c.blacklistPaths, regexp.MustCompile(v))
 		}
+	}
+}
+
+// WithCustomFilter allows to set a custom filter function.
+func WithCustomFilter(customFilter CustomFilter) ConfigOption {
+	return func(c *Config) {
+		c.customFilter = customFilter
 	}
 }
 
